@@ -77,6 +77,7 @@ export class AuthService {
         email: savedUser.email,
         username: savedUser.username,
         full_name: savedUser.full_name,
+        bio: savedUser.bio,
         role: savedUser.role,
         is_verified: savedUser.is_verified,
       },
@@ -153,6 +154,7 @@ export class AuthService {
       email: user.email,
       username: user.username,
       full_name: user.full_name,
+      bio: user.bio,
       role: user.role,
       is_verified: user.is_verified,
     };
@@ -185,6 +187,7 @@ export class AuthService {
         username: generatedUsername,
         is_verified: true,
         uuid: uuidv4(),
+        bio: googleUser.bio,
         role: 'user',
         has_password: false,
       });
