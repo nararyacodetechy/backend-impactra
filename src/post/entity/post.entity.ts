@@ -1,6 +1,6 @@
 // src/posts/entities/post.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany } from 'typeorm';
-import { User } from 'src/auth/user.entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { Support } from './support.entity';
 import { Comment } from './comment.entity';
 

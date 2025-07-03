@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from 'src/auth/user.entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CommentDto } from './dto/comment.dto';
 import { Repository } from 'typeorm';
@@ -25,7 +25,7 @@ export class PostService {
       ) {}   
 
     async createPost(dto: CreatePostDto, user: any) {
-    const author = await this.userRepo.findOneBy({ id: user.userId });
+    const author = await this.userRepo.findOneBy({ id: user.sub });
     if (!author) throw new NotFoundException('User not found');
     
     const post = this.postRepo.create({
@@ -37,12 +37,25 @@ export class PostService {
     return await this.postRepo.save(post);
     }
     
-    async getAllPosts() {
+    async getAllFeeds() {
         return this.postRepo.find({
         order: { created_at: 'DESC' },
         relations: ['author', 'comments', 'supports'],
         });
     }
+
+    async getPostsByUser(userId: number) {
+        const user = await this.userRepo.findOne({
+          where: { id: userId },
+          relations: ['posts', 'posts.comments', 'posts.supports'],
+        });
+      
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
+      
+        return user.posts.sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
+      }
     
     async addComment(postId: number, dto: CommentDto, user: User) {
         const post = await this.postRepo.findOneBy({ id: postId });

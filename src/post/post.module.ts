@@ -5,7 +5,7 @@ import { PostService } from './post.service';
 import { Support } from './entity/support.entity';
 import { Post } from './entity/post.entity';
 import { Comment } from './entity/comment.entity';  
-import { User } from 'src/auth/user.entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { CloudModule } from 'src/cloud/cloud.module';
 
 @Module({

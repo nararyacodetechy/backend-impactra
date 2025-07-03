@@ -1,10 +1,10 @@
 import { Controller, Post, Body, Request, UseGuards, BadRequestException, Query, Get, UnauthorizedException, Res, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { User } from './user.entity/user.entity';
+import { User } from '../user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')

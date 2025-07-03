@@ -1,7 +1,7 @@
 // src/posts/entities/comment.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { Post } from './post.entity';
-import { User } from 'src/auth/user.entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 
 @Entity()
 export class Comment {

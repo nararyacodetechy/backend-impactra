@@ -3,10 +3,10 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
-import { User } from './user.entity/user.entity';
+import { JwtStrategy } from './strategy/jwt.strategy';
+import { User } from '../user/entity/user.entity';
 import { EmailService } from 'src/email/email.service';
-import { GoogleStrategy } from './google.strategy';
+import { GoogleStrategy } from './strategy/google.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
