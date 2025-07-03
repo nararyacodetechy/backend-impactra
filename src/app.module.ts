@@ -3,6 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
+import { PostController } from './post/post.controller';
+import { PostService } from './post/post.service';
+import { PostModule } from './post/post.module';
+import { CloudModule } from './cloud/cloud.module';
 
 @Module({
   imports: [
@@ -25,6 +29,10 @@ import { ProfileModule } from './profile/profile.module';
     }),
     AuthModule,
     ProfileModule,
+    PostModule,
+    CloudModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
