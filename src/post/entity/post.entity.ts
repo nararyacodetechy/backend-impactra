@@ -1,13 +1,17 @@
 // src/posts/entities/post.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany, Generated, BeforeInsert } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Support } from './support.entity';
 import { Comment } from './comment.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ unique: true })
+  uuid: string;
 
   @Column({ type: 'text' })
   content: string;
@@ -26,4 +30,9 @@ export class Post {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @BeforeInsert()
+  generateUUID() {
+    this.uuid = uuidv4();
+  }
 }

@@ -3,8 +3,6 @@ import { PostService } from "./post.service";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { CommentDto } from "./dto/comment.dto";
 import { Body, Controller, Delete, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { CloudService } from "src/cloud/cloud.service";
 
 @Controller('posts')
 export class PostController {
@@ -16,21 +14,19 @@ export class PostController {
         @Body() dto: CreatePostDto,
         @Req() req,
     ) {
-        console.log('Incoming DTO:', dto);  // DTO akan punya: content + image_url
-        console.log('🧾 req.user:', req.user);
         return this.postService.createPost(dto, req.user);
     }
 
     @Get()
-    getAll() {
+    getAllPosts() {
         return this.postService.getAllFeeds();
     }
 
-    @Get('me')
-    @UseGuards(JwtAuthGuard)
-    getMyPosts(@Req() req: any) {
-        return this.postService.getPostsByUser(req.user.sub);
+    @Get('uuid/:uuid')
+    getPostByUUID(@Param('uuid') uuid: string) {
+    return this.postService.getPostByUUID(uuid);
     }
+
 
     @Post(':id/comment')
     @UseGuards(JwtAuthGuard)

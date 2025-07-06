@@ -25,7 +25,7 @@ export class PostService {
       ) {}   
 
     async createPost(dto: CreatePostDto, user: any) {
-    const author = await this.userRepo.findOneBy({ id: user.sub });
+    const author = await this.userRepo.findOneBy({ id: user.id });
     if (!author) throw new NotFoundException('User not found');
     
     const post = this.postRepo.create({
@@ -55,7 +55,7 @@ export class PostService {
         }
       
         return user.posts.sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
-      }
+    }
     
     async addComment(postId: number, dto: CommentDto, user: User) {
         const post = await this.postRepo.findOneBy({ id: postId });
@@ -89,6 +89,15 @@ export class PostService {
         
         return this.supportRepo.remove(support);
     }
-      
-      
+
+    async getPostByUUID(uuid: string) {
+    const post = await this.postRepo.findOne({
+        where: { uuid },
+        relations: ['author', 'comments', 'supports'],
+    });
+    
+    if (!post) throw new NotFoundException('Post not found');
+    
+    return post;
+    }
 }

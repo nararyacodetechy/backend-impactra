@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
+import { UpdateProfileDto } from '../dto/update-profile.dto';
 
 @Injectable()
 export class PrivateProfileService {
@@ -31,4 +32,24 @@ export class PrivateProfileService {
       },
     };
   }
+
+  async updateMyProfile(userId: number, dto: UpdateProfileDto) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    Object.assign(user, dto);
+    await this.userRepo.save(user);
+
+    return {
+      status: 'success',
+      message: 'Profile updated',
+      data: {
+        id: user.id,
+        full_name: user.full_name,
+        bio: user.bio,
+        avatar_url: user.avatar_url,
+      },
+    };
+  }
+
 }
