@@ -2,6 +2,7 @@ import { Post } from 'src/post/entity/post.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Support } from 'src/post/entity/support.entity'; // pastikan path sesuai struktur kamu
+import { LoginSession } from 'src/auth/entity/login-session.entity';
 
 @Entity()
 export class User {
@@ -10,6 +11,9 @@ export class User {
 
   @Column({ unique: true })
   uuid: string = uuidv4();
+
+  @OneToMany(() => LoginSession, session => session.user)
+  loginSessions: LoginSession[];
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;

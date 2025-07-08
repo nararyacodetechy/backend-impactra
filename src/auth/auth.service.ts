@@ -9,11 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { generateUsername } from 'src/utils/generate-username';
+import { LoginSession } from './entity/login-session.entity';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(LoginSession) private sessionRepo: Repository<LoginSession>,
     private jwtService: JwtService,
     private emailService: EmailService,
     private configService: ConfigService,
@@ -140,7 +143,7 @@ export class AuthService {
   }
   
 
-  async login(user: any) {
+  async login(user: any, req?: Request) {
     if (!user) {
       throw new UnauthorizedException({
         status: 'error',
@@ -162,6 +165,16 @@ export class AuthService {
     const token = this.jwtService.sign(payload, {
       expiresIn: '30d', // ✅ 30 hari
     });
+
+    // Simpan session
+    if (req) {
+      const session = this.sessionRepo.create({
+        user,
+        userAgent: req.headers['user-agent'],
+        ipAddress: req.ip,
+      });
+      await this.sessionRepo.save(session);
+    }
   
     return {
       status: 'success',
@@ -170,7 +183,18 @@ export class AuthService {
       expires_in: 2592000,
     };
   }
-  
+
+  async getLoginSessions(userId: number) {
+  const sessions = await this.sessionRepo.find({
+    where: { user: { id: userId } },
+    relations: ['user'],
+    order: { loggedInAt: 'DESC' },
+    take: 10,
+  });
+
+  return sessions;
+}
+
     
   async validateGoogleUser(googleUser: any) {
     let user = await this.userRepo.findOne({ where: { email: googleUser.email } });

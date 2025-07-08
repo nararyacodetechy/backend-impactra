@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Request, UseGuards, BadRequestException, Query, Get, UnauthorizedException, Res, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Query, Get, UnauthorizedException, Res, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from '../user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +6,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -34,19 +35,44 @@ export class AuthController {
     }
 
 
-    @Post('login')
-    async login(@Body() body: { email: string; password: string }) {
-        const user = await this.authService.validateUser(body.email, body.password);
+    // @Post('login')
+    // async login(@Body() body: { email: string; password: string }) {
+    //     const user = await this.authService.validateUser(body.email, body.password);
 
+    //     if (!user) {
+    //         throw new UnauthorizedException({
+    //             status: 'error',
+    //             message: 'Invalid credentials or email not verified',
+    //         });
+    //     }
+
+    //     return this.authService.login(user);
+    // }
+
+    @Post('login')
+    async login(@Body() body: { email: string; password: string }, @Req() req: Request) {
+        const user = await this.authService.validateUser(body.email, body.password);
         if (!user) {
-        throw new UnauthorizedException({
+            throw new UnauthorizedException({
             status: 'error',
             message: 'Invalid credentials or email not verified',
-        });
+            });
         }
-
-        return this.authService.login(user);
+        return this.authService.login(user, req);
     }
+
+    @UseGuards(JwtAuthGuard)
+        @Get('sessions')
+        async getSessions(@Req() req) {
+        const userId = req.user?.sub;
+        const sessions = await this.authService.getLoginSessions(userId);
+
+        return {
+            status: 'success',
+            data: sessions,
+        };
+    }
+
 
     @UseGuards(AuthGuard('google'))
     @Get('google')
