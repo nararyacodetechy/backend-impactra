@@ -1,8 +1,9 @@
 import { Post } from 'src/post/entity/post.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { Support } from 'src/post/entity/support.entity'; // pastikan path sesuai struktur kamu
 import { LoginSession } from 'src/auth/entity/login-session.entity';
+import { Support } from 'src/post/entity/support.entity';
+import { Comment } from 'src/post/entity/comment.entity';
 
 @Entity()
 export class User {
@@ -41,6 +42,9 @@ export class User {
 
   @OneToMany(() => Support, support => support.user)
   supports: Support[];
+
+  @OneToMany(() => Comment, comment => comment.user)
+  comments: Comment[];
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   password_reset_token: string | null;

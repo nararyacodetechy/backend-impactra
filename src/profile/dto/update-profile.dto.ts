@@ -1,4 +1,4 @@
-// src/profile/private/dto/update-profile.dto.ts
+// src/profile/dto/update-profile.dto.ts
 import { IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class UpdateProfileDto {

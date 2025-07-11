@@ -6,6 +6,7 @@ import { ProfileModule } from './profile/profile.module';
 import { PostModule } from './post/post.module';
 import { CloudModule } from './cloud/cloud.module';
 import { UserModule } from './user/user.module';
+import { PostCategoryModule } from './admin/post-category/post-category.module';
 
 @Module({
   imports: [
@@ -26,10 +27,15 @@ import { UserModule } from './user/user.module';
       }),
       inject: [ConfigService],
     }),
+    // User Module 
     AuthModule,
     ProfileModule,
+    UserModule,
     PostModule,
     CloudModule,
+
+    // Admin Module 
+    PostCategoryModule,
   ],
   controllers: [],
   providers: [],

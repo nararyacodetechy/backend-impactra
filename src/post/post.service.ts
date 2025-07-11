@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
 import { CreatePostDto } from './dto/create-post.dto';
-import { CommentDto } from './dto/comment.dto';
 import { Repository } from 'typeorm';
-import { Support } from './entity/support.entity';
 import { Post } from './entity/post.entity';
-import { Comment } from './entity/comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PostCategory } from './entity/post-category.entity';
+import { PostPrivateDetails } from './entity/post_private_details.entity';
 
 @Injectable()
 export class PostService {
@@ -14,28 +13,48 @@ export class PostService {
         @InjectRepository(Post)
         private postRepo: Repository<Post>,
       
-        @InjectRepository(Comment)
-        private commentRepo: Repository<Comment>,
-      
-        @InjectRepository(Support)
-        private supportRepo: Repository<Support>,
-
         @InjectRepository(User)
         private userRepo: Repository<User>,
+
+        @InjectRepository(PostCategory)
+        private categoryRepo: Repository<PostCategory>,
+
+        @InjectRepository(PostPrivateDetails)
+        private privateDetailRepo: Repository<PostPrivateDetails>,
       ) {}   
 
-    async createPost(dto: CreatePostDto, user: any) {
-    const author = await this.userRepo.findOneBy({ id: user.id });
-    if (!author) throw new NotFoundException('User not found');
-    
-    const post = this.postRepo.create({
-        content: dto.content,
-        image_url: dto.image_url,
-        author,
-    });
-    
-    return await this.postRepo.save(post);
-    }
+      async createPost(dto: CreatePostDto, user: any) {
+        const author = await this.userRepo.findOneBy({ id: user.id });
+        if (!author) throw new NotFoundException('User not found');
+      
+        const category = await this.categoryRepo.findOneBy({ id: dto.category_id });
+        if (!category) throw new NotFoundException('Category not found');
+      
+        const post = this.postRepo.create({
+          title: dto.title,
+          content: dto.content,
+          image_url: dto.image_url,
+          is_public: dto.is_public ?? true,
+          visibility_mode: dto.visibility_mode ?? 'full_public',
+          category,
+          author,
+        });
+      
+        const savedPost = await this.postRepo.save(post);
+      
+        // If private details exist, save them
+        if (dto.idea_details || dto.internal_notes) {
+          const privateDetails = this.privateDetailRepo.create({
+            post: savedPost,
+            idea_details: dto.idea_details,
+            internal_notes: dto.internal_notes,
+          });
+          await this.privateDetailRepo.save(privateDetails);
+        }
+      
+        return savedPost;
+      }
+      
     
     async getAllFeeds() {
         return this.postRepo.find({
@@ -56,48 +75,15 @@ export class PostService {
       
         return user.posts.sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
     }
-    
-    async addComment(postId: number, dto: CommentDto, user: User) {
-        const post = await this.postRepo.findOneBy({ id: postId });
-        if (!post) throw new NotFoundException('Post not found');
-    
-        const comment = this.commentRepo.create({ ...dto, post, user });
-        return this.commentRepo.save(comment);
-    }
-    
-    async supportPost(postId: number, user: User) {
-        const post = await this.postRepo.findOneBy({ id: postId });
-        if (!post) throw new NotFoundException('Post not found');
-        
-        const existingSupport = await this.supportRepo.findOne({
-            where: { post: { id: postId }, user: { id: user.id } },
-        });
-        
-        if (existingSupport) return existingSupport;
-        
-        const support = this.supportRepo.create({ post, user });
-            
-        return this.supportRepo.save(support);
-    }
-    
-    async unsupportPost(postId: number, user: User) {
-        const support = await this.supportRepo.findOne({
-            where: { post: { id: postId }, user: { id: user.id } },
-        });
-        
-        if (!support) throw new NotFoundException('Support not found');
-        
-        return this.supportRepo.remove(support);
-    }
 
     async getPostByUUID(uuid: string) {
-    const post = await this.postRepo.findOne({
+      const post = await this.postRepo.findOne({
         where: { uuid },
-        relations: ['author', 'comments', 'supports'],
-    });
+        relations: ['author', 'comments', 'supports', 'privateDetails'],
+      });
     
-    if (!post) throw new NotFoundException('Post not found');
+      if (!post) throw new NotFoundException('Post not found');
     
-    return post;
+      return post;
     }
 }
